@@ -12,6 +12,10 @@ function build_model(data::DataVRPRD, app)
 
    #println(vrprd.formulation)
 
+   for i in 1:n(data)
+      println(i, " " , d(data, i))
+   end
+
    function buildgraph(release_date::Int)
       v_source = v_sink = 0
      
@@ -29,10 +33,19 @@ function build_model(data::DataVRPRD, app)
       L, U = 0, upperBoundNbVehicles(data) # multiplicity
 
       G = VrpGraph(vrprd, V1, v_source, v_sink, (L, U))
+
+      if app["enable_cap_res"]
+         cap_res_id = add_resource!(G, main = true)
+      end
       time_res_id = add_resource!(G, main = true)
       
 
       for v in V1
+         if app["enable_cap_res"]
+            set_resource_bounds!(G, v, cap_res_id, 0, Q)
+         end
+
+         
          set_resource_bounds!(G, v, time_res_id, release_date, u(data, v))
       end
 
@@ -40,6 +53,10 @@ function build_model(data::DataVRPRD, app)
          if(i in V1 && j in V1)
             arc_id = add_arc!(G, i, j)
             add_arc_var_mapping!(G, arc_id, x[(i,j)])
+
+            if app["enable_cap_res"]
+               set_arc_consumption!(G, arc_id, cap_res_id, d(data, j))
+            end
             set_arc_consumption!(G, arc_id, time_res_id, t(data, (i, j)))
          end
       end
@@ -61,7 +78,7 @@ function build_model(data::DataVRPRD, app)
    for rd in all_release_dates
       G,V1 = buildgraph(Int(rd))
       add_graph!(vrprd, G)   
-      #println(G)
+      println(G)
       push!(graphs,G)
       #println(V1, packing_set_vertex)
       for v in V1
@@ -73,14 +90,10 @@ function build_model(data::DataVRPRD, app)
       k+=1
    end
 
-   for v in 1:n(data)
-      #println(v, " - ",packing_set_vertex[v])
-      set_vertex_packing_sets!(vrprd, [[(graphs[k],v) for k in packing_set_vertex[v]]])
-   end
-
    #define_elementarity_sets_distance_matrix!(vrprd, G, [[c(data, (i, j)) for j in V] for i in V])
 
-   #add_capacity_cut_separator!(vrprd, [ ( [(G,i)], Float64(d(data, i)) ) for i in V], Float64(Q))
+   set_vertex_packing_sets!(vrprd, [[(graphs[k],v) for k in packing_set_vertex[v]]  for v in 1:n(data)])
+   add_capacity_cut_separator!(vrprd, [ ( [(graphs[k],v) for k in packing_set_vertex[v]], Float64(d(data, v))) for v in 1:n(data)], Float64(Q))
 
    set_branching_priority!(vrprd, "x", 1)
 
