@@ -1,9 +1,15 @@
 import Base.show, Base.print
 
+mutable struct Route
+   departure::Int64
+   vertices::Array{Int}
+end
+
 mutable struct Solution
    cost::Float64
-   routes::Array{Array{Int}}
+   routes::Array{Route}
 end
+
 
 # build Solution from the variables x
 function getsolution(data::DataVRPRD, x, objval, optimizer)
@@ -15,6 +21,7 @@ function getsolution(data::DataVRPRD, x, objval, optimizer)
          push!(adj_list[a[1]+1], a[2])
       end
    end
+
    visited, routes = [false for i in 2:dim], []
    for i in adj_list[1]
       if !visited[i]
@@ -42,13 +49,51 @@ function getsolution(data::DataVRPRD, x, objval, optimizer)
    !isempty(filter(y->y==false,visited)) && error("Problem trying to recover the route from the x values. "*
                               "At least one vertex was not visited or there are subtours in the solution x.")
 
-   return Solution(objval, routes)
+   all_release_dates = []
+   for i in 1:n(data)
+      if(! (l(data, i) in all_release_dates) )
+         push!(all_release_dates, l(data, i))
+      end
+   end
+
+   sort!(all_release_dates)
+
+   new_routes = []
+   for r in routes
+      curr_route = Route(0,r)
+      for release_date in all_release_dates
+         flag = 1
+         for i in r
+            if(l(data, i) == release_date)
+               flag = 1
+            elseif (l(data, i) < release_date && (release_date + t(data, (i, 0)) <= u(data,i)))
+               flag = 1
+            else
+               flag = 0
+            end
+
+            if flag == 0
+               break
+            end
+         end
+         if flag == 1
+            curr_route.departure = release_date 
+         end
+      end
+      push!(new_routes,curr_route)
+   end
+
+
+   sol = Solution(objval, new_routes)
+   sort!(sol.routes,by = r -> r.departure)
+   return sol
 end
 
 function print_routes(solution)
+
    for (i,r) in enumerate(solution.routes)
-      print("Route #$i: ")
-      for j in r
+      print("Route #$i - Departure at $(r.departure): ")
+      for j in r.vertices
          print("$j ")
       end
       println()
@@ -87,7 +132,7 @@ end
 function writesolution(solpath, solution)
    open(solpath, "w") do f
       for (i,r) in enumerate(solution.routes)
-         write(f, "Route #$i: ")
+         write(f, "Route #$i - Departure at $(solution.departure[i]): ")
          for j in r
             write(f, "$j ") 
          end
@@ -136,5 +181,3 @@ function drawsolution(tikzpath, data, solution)
       write(f, "\\end{document}\n")
    end
 end
-
-

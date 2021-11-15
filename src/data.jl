@@ -37,7 +37,6 @@ function readVRPRDData(path_file::String)
    dist = Array{Any,1}()
    open(path_file) do file
       for line in eachline(file)
-         println(line)
          if findfirst("CUST", line) != nothing || findfirst("VEH", line) != nothing || 
 	    findfirst("NUMBER", line) != nothing
             continue
@@ -53,13 +52,10 @@ function readVRPRDData(path_file::String)
    K = parse(Int, data[2])
    Q = parse(Float64, data[3])
 
-   println(n," ",K," ",Q)
-
    vertices = Vertex[] 
    for i in 0:n
       
       offset = 3 + i*6
-      #println(offset," ", data[offset+2])
       x = parse(Float64, data[offset + 2])     
       y = parse(Float64, data[offset + 3])     
       d = parse(Int, data[offset + 4])     

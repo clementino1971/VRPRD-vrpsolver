@@ -56,10 +56,6 @@ function run_vrprd(app::Dict{String,Any})
    if !app["nosolve"]
       (model, x) = build_model(data, app)
 
-      #path_to_params_file = dirname(@__FILE__) * "/../config/VRPTW_set_1.cfg"
-      #enum_paths, complete_form = get_complete_formulation(model, path_to_params_file)
-
-      #println(complete_form)
       optimizer = VrpOptimizer(model, app["cfg"], instance_name)
       set_cutoff!(optimizer, app["ub"])
 

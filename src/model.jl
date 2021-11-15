@@ -11,11 +11,6 @@ function build_model(data::DataVRPRD, app)
    @constraint(vrprd.formulation, indeg[i in V], sum(x[a] for a in A if a[2] == i) == 1.0)
 
    #println(vrprd.formulation)
-   
-   # Build the model directed graph G=(V1,A1)
-
-   # Quais release dates tem entregas a se fazer
-   # Para cada release date tem-se que construir um grafo
 
    function buildgraph(release_date::Int)
       v_source = v_sink = 0
@@ -24,8 +19,7 @@ function build_model(data::DataVRPRD, app)
       for i in 1:n(data)
          if(l(data, i) == release_date)
             push!(V1,i)
-         elseif (l(data, i) < release_date && (release_date + t(data, (i, 0)) <= u(data,i) ))
-            #println(t(data, (i, 0)) )
+         elseif (l(data, i) < release_date && (release_date + t(data, (i, 0)) <= u(data,i)))
             push!(V1,i)
          end   
       end
@@ -69,7 +63,7 @@ function build_model(data::DataVRPRD, app)
       add_graph!(vrprd, G)   
       #println(G)
       push!(graphs,G)
-      println(V1, packing_set_vertex)
+      #println(V1, packing_set_vertex)
       for v in V1
          if(v == 0)
             continue
