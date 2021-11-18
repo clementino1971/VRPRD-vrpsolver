@@ -12,10 +12,6 @@ function build_model(data::DataVRPRD, app)
 
    #println(vrprd.formulation)
 
-   for i in 1:n(data)
-      println(i, " " , d(data, i))
-   end
-
    function buildgraph(release_date::Int)
       v_source = v_sink = 0
      
@@ -46,7 +42,7 @@ function build_model(data::DataVRPRD, app)
          end
 
          
-         set_resource_bounds!(G, v, time_res_id, release_date, u(data, v))
+         set_resource_bounds!(G, v, time_res_id, 0, u(data, v) - release_date)
       end
 
       for (i,j) in A

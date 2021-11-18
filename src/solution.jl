@@ -77,7 +77,8 @@ function getsolution(data::DataVRPRD, x, objval, optimizer)
             end
          end
          if flag == 1
-            curr_route.departure = release_date 
+            curr_route.departure = release_date
+            break
          end
       end
       push!(new_routes,curr_route)
