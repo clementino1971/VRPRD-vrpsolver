@@ -62,6 +62,7 @@ function run_vrprd(app::Dict{String,Any})
       (status, solution_found) = optimize!(optimizer)
       if solution_found
          sol = getsolution(data, x, get_objective_value(optimizer), optimizer)
+         check_solution(data,sol)
       end
    end
 

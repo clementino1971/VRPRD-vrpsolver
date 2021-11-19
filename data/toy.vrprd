@@ -8,5 +8,5 @@ CUSTOMER
 CUST NO.  XCOORD    YCOORD    DEMAND    RELEASE TIME  DEADLINE TIME
 0         82        76        0         0             720           
 1         96        44        19        90            140           
-2         50        5         99        120           450           
+2         50        5         99        120           228           
 3         49        8         1         150           420                    

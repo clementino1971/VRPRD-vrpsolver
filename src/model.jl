@@ -41,8 +41,16 @@ function build_model(data::DataVRPRD, app)
             set_resource_bounds!(G, v, cap_res_id, 0, Q)
          end
 
-         
-         set_resource_bounds!(G, v, time_res_id, 0, u(data, v) - release_date)
+         if(v != 0)
+
+            if(release_date+t(data, (0, v)) >= u(data, v))
+               println("Janela Impossível ", v);
+            end
+
+            set_resource_bounds!(G, v, time_res_id, release_date+t(data, (0, v)), u(data, v))
+         else
+            set_resource_bounds!(G, v, time_res_id, release_date, u(data, v))
+         end
       end
 
       for (i,j) in A

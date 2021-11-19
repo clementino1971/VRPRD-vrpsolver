@@ -90,6 +90,42 @@ function getsolution(data::DataVRPRD, x, objval, optimizer)
    return sol
 end
 
+function check_solution(data::DataVRPRD,solution)
+   
+   for (i,r) in enumerate(solution.routes)
+      invalid = 0
+      v = 0
+      cur_time = r.departure
+      println("Route $i: depart at $(cur_time)")
+
+      for w in r.vertices
+         cur_time += t(data,(v,w))
+         println("On $w at $(cur_time)")
+         if(cur_time > u(data,w))
+            invalid = 1
+            break
+         end
+
+         v = w
+      end
+
+      cur_time += t(data,(v,0))
+      println("On 0 at $(cur_time)")
+      if(cur_time > u(data,0))
+         invalid = 1
+         break
+      end
+
+      print("Route $i: ")
+      if invalid == 1
+         println("INVALID\n")
+         break
+      else
+         println("OK\n")
+      end
+   end
+end
+
 function print_routes(solution)
 
    for (i,r) in enumerate(solution.routes)
@@ -168,9 +204,11 @@ function drawsolution(tikzpath, data, solution)
          end
       end
       write(f, "\\begin{pgfonlayer}{back}\n")
+
+
       for (idr,r) in enumerate(solution.routes)
          prev = 0
-         for i in r
+         for i in r.vertices
             a = (prev,i)
             edge_style = (prev == 0 || i == 0) ? "dashed,line width=0.2pt,opacity=.4" : "line width=0.4pt"
             write(f, "\t\\path[->,$(edge_style)] (v$(a[1])) edge node {} (v$(a[2]));\n")
