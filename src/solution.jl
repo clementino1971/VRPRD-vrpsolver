@@ -169,8 +169,8 @@ end
 function writesolution(solpath, solution)
    open(solpath, "w") do f
       for (i,r) in enumerate(solution.routes)
-         write(f, "Route #$i - Departure at $(solution.departure[i]): ")
-         for j in r
+         write(f, "Route #$i - Departure at $(r.departure): ")
+         for j in r.vertices
             write(f, "$j ") 
          end
          write(f, "\n")
